@@ -1,5 +1,3 @@
-The order of commands to update the DB
-
 включение сервера монги на фоне (из cmd):
 ```
 start /min mongod
