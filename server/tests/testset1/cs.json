@@ -1,0 +1,7 @@
+{
+	"request_type"	: "create_session",
+	"session_type"	: "call",
+	"created"	: {"$date": 1488519375000},
+	"from_"		: "Alice",
+	"to_"		: "Bob"
+}

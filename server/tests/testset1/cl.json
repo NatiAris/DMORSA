@@ -1,0 +1,7 @@
+{
+	"request_type"	: "create_leg",
+	"session_id"	: 8,
+	"created"	: {"$date": 1488519699000},
+	"from_"		: "Alice",
+	"to_"		: "S001"
+}
