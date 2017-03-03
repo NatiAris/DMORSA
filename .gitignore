@@ -1,2 +1,9 @@
 sandbox*
 .idea/*
+
+server/tests/datetime
+server/tests/json
+server/tests/pymongo
+server/tests/random
+server/tests/sys
+
