@@ -12,16 +12,17 @@ from bson import json_util
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qsl
 
-print(sys.argv)
-try:
-    DEBUG = int(sys.argv[1])
-except Exception:
-    DEBUG = 1
-
 
 def dprint(*args, **kwargs):
     if DEBUG:
         print(*args, **kwargs)
+
+try:
+    DEBUG = bool(int(sys.argv[1]))
+except Exception:
+    DEBUG = True
+dprint('DEBUG=%s' % DEBUG)
+
 
 mongo_client = pymongo.MongoClient('localhost', 27017)
 db = mongo_client.asl
@@ -32,38 +33,44 @@ sessions = db.sessions
 nv_fields = {'session_type', 'from_', 'to_', 'created', 'updated', 'terminated'}
 
 
-def get_phone_time(phone_id, t, T, verbose):
+def get_phone_time(phone_id, verbose=False,
+                   t=None, T=None, over_last=None):
+    if not (over_last or (t and T)):
+        raise NameError('Time not specified')
+    if over_last:
+        T = datetime.datetime.utcnow()
+        t = T - datetime.timedelta(hours=int(over_last))
+    else:
+        T = datetime.datetime.utcfromtimestamp(T)
+        t = datetime.datetime.utcfromtimestamp(t)
+    # not (ended < t or beginning > T) => take
+    # ended ≥ t and beginnig ≤ T
+    # dprint(t, T, over_last, phone_id, sep='\n')
     findings = sessions.find({'participants': phone_id,
-                              'created': {'$lte': T},
-                              'terminated': {'$gte': t}})
+                              'created'     : {'$lte': T},
+                              'terminated'  : {'$gte': t}})
+    # findings = sessions.find({})
+    # dprint('findings:', findings)
+    if not verbose:  # TODO: Check if mongo's method faster
+        findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
+    else:
+        findings = list(findings)
+    # dprint('Relative success\tphone_time\n', '\n'.join(str(x) for x in findings))
     return list(findings)
 
 
 def get_phones_time(phone_ids=None, account_id=None, verbose=False,
-                   t=None, T=None, over_last=None):
-    dprint(locals())
-    if not (over_last or (t and T)):
-        raise NameError('Time not specified')
-    if over_last:
-        T = datetime.datetime.now()  # Memento time zone
-        t = T - datetime.timedelta(hours=int(over_last))
+                    t=None, T=None, over_last=None):
     if not any((phone_ids, account_id)):
         raise NameError('Missing phone/account ids')
     if account_id:
-        phone_ids = list(accounts.find_one({'_id': int(account_id)}).phones)
+        phone_ids = list(map(int, accounts.find_one({'_id': int(account_id)})['phones']))
     else:
         phone_ids = list(map(int, phone_ids.split(',')))
-    # not (last change < t or beginning > T) => take
-    # last change ≥ t and beginnig ≤ T
-    # dprint(t, T, over_last, phoneID, sep='\n')
-    findings = sessions.find({'participants'  : {'$in' : phone_ids},
-                              'terminated': {'$gte': t},
-                              'created': {'$lte': T}})
-    if not verbose:
-        findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
-    else:
-        findings = list(findings)
-    dprint('Relative success\n', '\n'.join(str(x) for x in findings))
+
+    findings = [get_phone_time(phone_id, verbose=verbose, t=t, T=T, over_last=over_last)
+                for phone_id in phone_ids]
+    dprint('Relative success\tphones_time\n', '\n'.join(str(x) for x in findings))
     return json.dumps(findings, default=json_util.default)
 
 
@@ -73,7 +80,7 @@ def get_phone_n(n, phone_id, verbose=False):  # Will probably change if we imple
         findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
     else:
         findings = list(findings)
-    dprint('Relative success\n', '\n'.join(str(x) for x in findings))
+    dprint('Relative success\tphone_n\n', '\n'.join(str(x) for x in findings))
     return json.dumps(findings, default=json_util.default)
 
 
@@ -83,24 +90,23 @@ def get_time_only(t=None, T=None, over_last=None, verbose=False):
     if over_last:
         T = datetime.datetime.now()  # Memento time zone
         t = T - datetime.timedelta(hours=int(over_last))
+    else:
+        T = datetime.datetime.utcfromtimestamp(T)
+        t = datetime.datetime.utcfromtimestamp(t)
     findings = sessions.find({'updated': {'$gte': t},
                               'created': {'$lte': T}})
     if not verbose:
         findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
     else:
         findings = list(findings)
-    dprint('Relative success\n', '\n'.join(str(x) for x in findings))
+    dprint('Relative success\ttime_only\n', '\n'.join(str(x) for x in findings))
     return json.dumps(findings, default=json_util.default)
 
 
 def get_request(request_type=None, **kwargs):
-    ''' 
-    verbose=False,
-    accound_id=None, phone_ids=None,
-    t=None, T=None, over_last=None, N=None
-    '''
     switch = {'phone_n'    : get_phone_n,
               'time_only'  : get_time_only,
+              'phone_time' : get_phone_time,
               'phones_time': get_phones_time}
     try:
         handler = switch[request_type]
@@ -115,20 +121,20 @@ def get_request(request_type=None, **kwargs):
 
 def create_session(session_type, created, from_, to_):
     created = datetime.datetime.utcfromtimestamp(created['$date'] // 1e3)
-    session_id = 8 if DEBUG else random.getrandbits(96) # TODO: I'm really sorry for doing this even for testing
+    session_id = 8 if DEBUG else random.getrandbits(96)  # TODO: I'm really sorry for doing this even if only for testing
     session_id = sessions.insert_one({'_id'         : session_id,
                                       'session_type': session_type,
                                       'created'     : created,
                                       'from_'       : from_,
                                       'to_'         : to_,
                                       'legs'        : []}).inserted_id
-    # dprint(sessions.find_one({}))
+    dprint(session_id)
     return session_id
 
 
 def create_leg(session_id, created, from_, to_):
     created = datetime.datetime.utcfromtimestamp(created['$date'] // 1e3)
-    leg_id = 17 if DEBUG else random.getrandbits(96) # TODO: Testing-time hard-code
+    leg_id = 17 if DEBUG else random.getrandbits(96)  # TODO: Testing-time hard-code
     modcount = sessions.update_one({'_id': session_id},
                                    {
                                        '$addToSet': {'legs': {'_id'    : leg_id,
