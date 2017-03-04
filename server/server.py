@@ -1,28 +1,28 @@
 # coding: utf-8
 
 # import time
-import random
+# import random
+import logging
 import sys
 # Interaction with mongo and json files
 import pymongo
 import datetime
 import json
-from bson import json_util
+from bson import json_util, objectid
 # For the server
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qsl
 
 
-def dprint(*args, **kwargs):
-    if DEBUG:
-        print(*args, **kwargs)
-
 try:
     DEBUG = bool(int(sys.argv[1]))
-except Exception:
+except IndexError:
     DEBUG = True
+logging_level = logging.DEBUG if DEBUG else logging.INFO
+logging.basicConfig(level=logging_level, stream=sys.stdout)
+dprint = lambda *x: logging.debug(x) if len(x) > 1 else logging.debug(*x)
+iprint = lambda *x: logging.info(x) if len(x) > 1 else logging.debug(*x)
 dprint('DEBUG=%s' % DEBUG)
-
 
 mongo_client = pymongo.MongoClient('localhost', 27017)
 db = mongo_client.asl
@@ -121,7 +121,7 @@ def get_request(request_type=None, **kwargs):
 
 def create_session(session_type, created, from_, to_):
     created = datetime.datetime.utcfromtimestamp(created['$date'] // 1e3)
-    session_id = 8 if DEBUG else random.getrandbits(96)  # TODO: I'm really sorry for doing this even if only for testing
+    session_id = objectid.ObjectId()
     session_id = sessions.insert_one({'_id'         : session_id,
                                       'session_type': session_type,
                                       'created'     : created,
@@ -134,7 +134,7 @@ def create_session(session_type, created, from_, to_):
 
 def create_leg(session_id, created, from_, to_):
     created = datetime.datetime.utcfromtimestamp(created['$date'] // 1e3)
-    leg_id = 17 if DEBUG else random.getrandbits(96)  # TODO: Testing-time hard-code
+    leg_id = objectid.ObjectId()
     modcount = sessions.update_one({'_id': session_id},
                                    {
                                        '$addToSet': {'legs': {'_id'    : leg_id,
@@ -215,5 +215,5 @@ class MyRequestHandler(BaseHTTPRequestHandler):
 
 if __name__ == '__main__':
     serv = HTTPServer(("localhost", 3467), MyRequestHandler)
-    print('Entering mainloop', serv.server_address)
+    iprint('Entering mainloop', serv.server_address)
     serv.serve_forever()
