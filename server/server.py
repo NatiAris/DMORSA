@@ -20,8 +20,9 @@ except IndexError:
     DEBUG = True
 logging_level = logging.DEBUG if DEBUG else logging.INFO
 logging.basicConfig(level=logging_level, stream=sys.stdout)
-dprint = lambda *x: logging.debug(x) if len(x) > 1 else logging.debug(*x)
-iprint = lambda *x: logging.info(x) if len(x) > 1 else logging.debug(*x)
+dprint = lambda *x: logging.debug(' '.join(map(str, x)))
+iprint = lambda *x: logging.info(' '.join(map(str, x)))
+eprint = lambda *x: logging.error(' '.join(map(str, x)))
 dprint('DEBUG=%s' % DEBUG)
 
 mongo_client = pymongo.MongoClient('localhost', 27017)
@@ -197,7 +198,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.flush_headers()
             self.wfile.write(bytes(str(response) + '\n', 'utf-8'))
         except Exception as ex:
-            dprint(ex)
+            eprint(ex)
     
     def do_POST(self):
         try:
@@ -210,7 +211,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.flush_headers()
             self.wfile.write(bytes(str(response) + '\n', 'utf-8'))
         except Exception as ex:
-            dprint(ex)
+            eprint(ex)
 
 
 if __name__ == '__main__':
