@@ -20,10 +20,12 @@ except IndexError:
     DEBUG = True
 logging_level = logging.DEBUG if DEBUG else logging.INFO
 logging.basicConfig(level=logging_level, stream=sys.stdout)
+log = logging.getLogger()
 dprint = lambda *x: logging.debug(' '.join(map(str, x)))
 iprint = lambda *x: logging.info(' '.join(map(str, x)))
-eprint = lambda *x: logging.error(' '.join(map(str, x)))
+eprint = lambda *x: logging.exception(' '.join(map(str, x)))
 dprint('DEBUG=%s' % DEBUG)
+
 
 mongo_client = pymongo.MongoClient('localhost', 27017)
 db = mongo_client.asl
@@ -129,12 +131,13 @@ def create_session(session_type, created, from_, to_):
                                       'from_'       : from_,
                                       'to_'         : to_,
                                       'legs'        : []}).inserted_id
-    dprint(session_id)
+    dprint('Session id:', session_id)
     return session_id
 
 
 def create_leg(session_id, created, from_, to_):
     created = datetime.datetime.utcfromtimestamp(created['$date'] // 1e3)
+    session_id = objectid.ObjectId(session_id)
     leg_id = objectid.ObjectId()
     modcount = sessions.update_one({'_id': session_id},
                                    {
@@ -143,30 +146,33 @@ def create_leg(session_id, created, from_, to_):
                                                               'from_'  : from_,
                                                               'to_'    : to_}}
                                    }).modified_count
-    dprint(modcount)
-
+    dprint('Modified count:', modcount)
+    dprint('Leg id:', leg_id)
     return leg_id
 
 
 def update_session(session_id, terminated):
+    session_id = objectid.ObjectId(session_id)
     terminated = datetime.datetime.utcfromtimestamp(terminated['$date'] // 1e3)
     response = sessions.update_one({'_id': session_id},
                                    {
                                        '$set': {'terminated': terminated},
                                        '$currentDate': {'updated': True}
                                    }).modified_count
-    dprint(response)
+    dprint('Modified count:', response)
     return response
 
 
 def update_leg(session_id, leg_id, terminated):
+    session_id = objectid.ObjectId(session_id)
+    leg_id = objectid.ObjectId(leg_id)
     terminated = datetime.datetime.utcfromtimestamp(terminated['$date'] // 1e3)
     response = sessions.update_one({'_id': session_id, 'legs._id': leg_id},
                                    {
                                         '$set': {'legs.$.terminated': terminated},
                                         '$currentDate': {'updated': True}
                                    }).modified_count
-    dprint(response)
+    dprint('Modified count:', response)
     return response
 
 
