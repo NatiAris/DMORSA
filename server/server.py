@@ -123,7 +123,7 @@ def get_request(request_type=None, **kwargs):
 
 
 def create_session(session_type, created, from_, to_):
-    created = datetime.datetime.utcfromtimestamp(created['$date'] // 1e3)
+    # created = datetime.datetime.utcfromtimestamp(created['$date'] // 1e3)
     session_id = objectid.ObjectId()
     session_id = sessions.insert_one({'_id'         : session_id,
                                       'session_type': session_type,
@@ -136,7 +136,7 @@ def create_session(session_type, created, from_, to_):
 
 
 def create_leg(session_id, created, from_, to_):
-    created = datetime.datetime.utcfromtimestamp(created['$date'] // 1e3)
+    # created = datetime.datetime.utcfromtimestamp(created['$date'] // 1e3)
     session_id = objectid.ObjectId(session_id)
     leg_id = objectid.ObjectId()
     modcount = sessions.update_one({'_id': session_id},
@@ -153,7 +153,7 @@ def create_leg(session_id, created, from_, to_):
 
 def update_session(session_id, terminated):
     session_id = objectid.ObjectId(session_id)
-    terminated = datetime.datetime.utcfromtimestamp(terminated['$date'] // 1e3)
+    # terminated = datetime.datetime.utcfromtimestamp(terminated['$date'] // 1e3)
     response = sessions.update_one({'_id': session_id},
                                    {
                                        '$set': {'terminated': terminated},
@@ -166,7 +166,7 @@ def update_session(session_id, terminated):
 def update_leg(session_id, leg_id, terminated):
     session_id = objectid.ObjectId(session_id)
     leg_id = objectid.ObjectId(leg_id)
-    terminated = datetime.datetime.utcfromtimestamp(terminated['$date'] // 1e3)
+    # terminated = datetime.datetime.utcfromtimestamp(terminated['$date'] // 1e3)
     response = sessions.update_one({'_id': session_id, 'legs._id': leg_id},
                                    {
                                         '$set': {'legs.$.terminated': terminated},
@@ -209,7 +209,8 @@ class MyRequestHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             length = int(self.headers['content-length'])
-            data = json.loads(str(self.rfile.read(length), 'utf-8'))
+            rawdata = self.rfile.read(length)
+            data = json_util.loads(str(rawdata, 'utf-8'))
             response = post_request(data)
             self.send_response(200)
             self.send_header('content-type', 'text/html')
