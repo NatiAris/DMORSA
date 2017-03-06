@@ -49,7 +49,7 @@ def get_phone_time(phone_id, verbose=False,
     # not (ended < t or beginning > T) => take
     # ended ≥ t and beginnig ≤ T
     # dprint(t, T, over_last, phone_id, sep='\n')
-    findings = sessions.find({'participants': phone_id,
+    findings = sessions.find({'participants': int(phone_id),
                               'created'     : {'$lte': T},
                               'terminated'  : {'$gte': t}})
     # findings = sessions.find({})
@@ -128,8 +128,8 @@ def create_session(session_type, created, from_, to_):
     session_id = sessions.insert_one({'_id'         : session_id,
                                       'session_type': session_type,
                                       'created'     : created,
-                                      'from_'       : from_,
-                                      'to_'         : to_,
+                                      'from_'       : int(from_),
+                                      'to_'         : int(to_),
                                       'legs'        : []}).inserted_id
     dprint('Session id:', session_id)
     return session_id
@@ -143,8 +143,8 @@ def create_leg(session_id, created, from_, to_):
                                    {
                                        '$addToSet': {'legs': {'_id'    : leg_id,
                                                               'created': created,
-                                                              'from_'  : from_,
-                                                              'to_'    : to_}}
+                                                              'from_'  : int(from_),
+                                                              'to_'    : int(to_)}}
                                    }).modified_count
     dprint('Modified count:', modcount)
     dprint('Leg id:', leg_id)
