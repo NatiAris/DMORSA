@@ -1,0 +1,7 @@
+{
+"request_type" :"create_leg",
+"from_" :"959889",
+"to_" :"-1",
+"session_id" :"58bea2b1ba3edc0cb8700f83",
+"created" :{"$date": 1451229574372}
+}

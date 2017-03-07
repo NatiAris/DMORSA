@@ -1,0 +1,5 @@
+{
+"request_type" :"update_session",
+"session_id" :"58bea2b1ba3edc0cb8700f83",
+"terminated" :{"$date": 1451229945961}
+}
