@@ -91,7 +91,7 @@ def get_time_only(t=None, T=None, over_last=None, verbose=False):
     if not (over_last or (t and T)):
         raise NameError('Time not specified')
     if over_last:
-        T = datetime.datetime.now()  # Memento time zone
+        T = datetime.datetime.utcnow()
         t = T - datetime.timedelta(hours=int(over_last))
     else:
         T = datetime.datetime.utcfromtimestamp(T)
@@ -129,7 +129,7 @@ def create_session(session_type, created, from_, to_):
     session_id = sessions.insert_one({'_id'         : session_id,
                                       'session_type': session_type,
                                       'created'     : created,
-                                      '$currentDate': {'updated': True},
+                                      'updated'     : datetime.datetime.utcnow(),
                                       'from_'       : from_,
                                       'to_'         : to_,
                                       'participants': [from_, to_],
@@ -142,7 +142,7 @@ def create_leg(session_id, created, from_, to_):
     # created = datetime.datetime.utcfromtimestamp(created['$date'] // 1e3)
     session_id = objectid.ObjectId(session_id)
     leg_id = objectid.ObjectId()
-    user = list(filter(lambda x: int(x) > 0, (from_, to_)))
+    user = list(map(int, filter(lambda x: int(x) > 0, (from_, to_))))
     modcount = sessions.update_one({'_id': session_id},
                                    {
                                        '$addToSet': {'legs': {'_id'    : leg_id,
