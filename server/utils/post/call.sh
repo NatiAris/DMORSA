@@ -39,6 +39,8 @@ echo "{
 \"terminated\" :{\"\$date\": $terminated}
 }" > call/ul1.json
 
+curl -X POST --data @call/ul1.json http://localhost:3467/ --header "Content-Type:application/json"
+
 leg_id=$(curl -X POST --data @call/cl2.json http://localhost:3467/ --header "Content-Type:application/json")
 
 echo "{
@@ -47,6 +49,8 @@ echo "{
 \"session_id\" :\"$session_id\",
 \"terminated\" :{\"\$date\": $terminated}
 }" > call/ul2.json
+
+curl -X POST --data @call/ul2.json http://localhost:3467/ --header "Content-Type:application/json"
 
 echo "{
 \"request_type\" :\"update_session\",
