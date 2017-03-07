@@ -129,6 +129,7 @@ def create_session(session_type, created, from_, to_):
     session_id = sessions.insert_one({'_id'         : session_id,
                                       'session_type': session_type,
                                       'created'     : created,
+                                      '$currentDate': {'updated': True},
                                       'from_'       : from_,
                                       'to_'         : to_,
                                       'participants': [from_, to_],
@@ -148,7 +149,8 @@ def create_leg(session_id, created, from_, to_):
                                                               'created': created,
                                                               'from_'  : int(from_),
                                                               'to_'    : int(to_)},
-                                                     'participants': {'$each': user}}
+                                                     'participants': {'$each': user}},
+                                       '$currentDate': {'updated': True}
                                    }).modified_count
     dprint('Modified count:', modcount)
     dprint('Leg id:', leg_id)
