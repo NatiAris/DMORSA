@@ -125,11 +125,13 @@ def get_request(request_type=None, **kwargs):
 def create_session(session_type, created, from_, to_):
     # created = datetime.datetime.utcfromtimestamp(created['$date'] // 1e3)
     session_id = objectid.ObjectId()
+    from_, to_ = int(from_), int(to_)
     session_id = sessions.insert_one({'_id'         : session_id,
                                       'session_type': session_type,
                                       'created'     : created,
-                                      'from_'       : int(from_),
-                                      'to_'         : int(to_),
+                                      'from_'       : from_,
+                                      'to_'         : to_,
+                                      'participants': [from_, to_],
                                       'legs'        : []}).inserted_id
     dprint('Session id:', session_id)
     return session_id
@@ -139,12 +141,14 @@ def create_leg(session_id, created, from_, to_):
     # created = datetime.datetime.utcfromtimestamp(created['$date'] // 1e3)
     session_id = objectid.ObjectId(session_id)
     leg_id = objectid.ObjectId()
+    user = list(filter(lambda x: int(x) > 0, (from_, to_)))
     modcount = sessions.update_one({'_id': session_id},
                                    {
                                        '$addToSet': {'legs': {'_id'    : leg_id,
                                                               'created': created,
                                                               'from_'  : int(from_),
-                                                              'to_'    : int(to_)}}
+                                                              'to_'    : int(to_)},
+                                                     'participants': {'$each': user}}
                                    }).modified_count
     dprint('Modified count:', modcount)
     dprint('Leg id:', leg_id)
