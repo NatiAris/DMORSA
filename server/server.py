@@ -43,9 +43,9 @@ def get_phone_time(phone_id, verbose=False,
     if over_last:
         T = datetime.datetime.utcnow()
         t = T - datetime.timedelta(hours=int(over_last))
-    else:
-        T = datetime.datetime.utcfromtimestamp(T)
-        t = datetime.datetime.utcfromtimestamp(t)
+    #else:
+    #    T = datetime.datetime.utcfromtimestamp(T)
+    #    t = datetime.datetime.utcfromtimestamp(t)
     # not (ended < t or beginning > T) => take
     # ended ≥ t and beginnig ≤ T
     # dprint(t, T, over_last, phone_id, sep='\n')
@@ -78,7 +78,7 @@ def get_phones_time(phone_ids=None, account_id=None, verbose=False,
 
 
 def get_phone_n(n, phone_id, verbose=False):  # Will probably change if we implement queues
-    findings = sessions.find({'participants': int(phone_id)}).sort([('updated', 1)]).limit(int(n))
+    findings = sessions.find({'participants': int(phone_id)}).sort([('created', -1)]).limit(int(n))
     if not verbose:
         findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
     else:
@@ -93,11 +93,11 @@ def get_time_only(t=None, T=None, over_last=None, verbose=False):
     if over_last:
         T = datetime.datetime.utcnow()
         t = T - datetime.timedelta(hours=int(over_last))
-    else:
-        T = datetime.datetime.utcfromtimestamp(T)
-        t = datetime.datetime.utcfromtimestamp(t)
-    findings = sessions.find({'updated': {'$gte': t},
-                              'created': {'$lte': T}})
+    #else:
+    #    T = datetime.datetime.utcfromtimestamp(T)
+    #    t = datetime.datetime.utcfromtimestamp(t)
+    findings = sessions.find({'terminated': {'$gte': t},
+                              'created'   : {'$lte': T}})
     if not verbose:
         findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
     else:
@@ -130,6 +130,7 @@ def create_session(session_type, created, from_, to_):
                                       'session_type': session_type,
                                       'created'     : created,
                                       'updated'     : datetime.datetime.utcnow(),
+                                      'terminated'  : datetime.datetime.utcnow() + datetime.timedelta(hours=24),
                                       'from_'       : from_,
                                       'to_'         : to_,
                                       'participants': [from_, to_],
@@ -147,6 +148,7 @@ def create_leg(session_id, created, from_, to_):
                                    {
                                        '$addToSet': {'legs': {'_id'    : leg_id,
                                                               'created': created,
+                                                              'terminated': datetime.datetime.utcnow() + datetime.timedelta(hours=24),
                                                               'from_'  : int(from_),
                                                               'to_'    : int(to_)},
                                                      'participants': {'$each': user}},
