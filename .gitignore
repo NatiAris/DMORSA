@@ -7,3 +7,4 @@ server/tests/pymongo
 server/tests/random
 server/tests/sys
 
+sharding/data/
