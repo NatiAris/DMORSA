@@ -31,6 +31,7 @@ mongo_client = pymongo.MongoClient('localhost', 27017)
 db = mongo_client.asl
 accounts = db.accounts
 sessions = db.sessions
+legs = db.legs
 
 # Non-verbose case fields
 nv_fields = {'session_type', 'from_', 'to_', 'created', 'updated', 'terminated'}
@@ -38,28 +39,36 @@ nv_fields = {'session_type', 'from_', 'to_', 'created', 'updated', 'terminated'}
 
 def get_phone_time(phone_id, verbose=False,
                    t=None, T=None, over_last=None):
+    phone_id = int(phone_id)
     if not (over_last or (t and T)):
         raise NameError('Time not specified')
     if over_last:
         T = datetime.datetime.utcnow()
         t = T - datetime.timedelta(hours=int(over_last))
-    #else:
-    #    T = datetime.datetime.utcfromtimestamp(T)
-    #    t = datetime.datetime.utcfromtimestamp(t)
+    # dprint(t, T, over_last, phone_id, sep='\n')
     # not (ended < t or beginning > T) => take
     # ended ≥ t and beginnig ≤ T
-    # dprint(t, T, over_last, phone_id, sep='\n')
-    findings = sessions.find({'participants': int(phone_id),
-                              'created'     : {'$lte': T},
-                              'terminated'  : {'$gte': t}})
+    findings = legs.find({'$or': [{'from_': phone_id}, {'to_': phone_id}],
+                          'created': {'$lte': T},
+                          'terminated': {'$gte': t}},
+                         {'created': 1, 'terminated': 1, '_sid': 1})
+    out = []
+    for leg in findings:
+        session = sessions.find_one({'_id': leg['_sid']})
+        finding = {'created': leg['created'],
+                   'terminated': leg['terminated'],
+                   'from_': session['from_'],
+                   'to_': session['to_']}
+        out.append(finding)
+    # TODO: account for verbose
     # findings = sessions.find({})
     # dprint('findings:', findings)
-    if not verbose:  # TODO: Check if mongo's method faster
-        findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
-    else:
-        findings = list(findings)
+    # if not verbose:
+    #     findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
+    # else:
+    #     findings = list(findings)
     # dprint('Relative success\tphone_time\n', '\n'.join(str(x) for x in findings))
-    return list(findings)
+    return out
 
 
 def get_phones_time(phone_ids=None, account_id=None, verbose=False,
@@ -71,20 +80,33 @@ def get_phones_time(phone_ids=None, account_id=None, verbose=False,
     else:
         phone_ids = list(map(int, phone_ids.split(',')))
 
-    findings = [get_phone_time(phone_id, verbose=verbose, t=t, T=T, over_last=over_last)
-                for phone_id in phone_ids]
-    dprint('Relative success\tphones_time\n', '\n'.join(str(x) for x in findings))
-    return json.dumps(findings, default=json_util.default)
+    findings = (get_phone_time(phone_id, verbose=verbose, t=t, T=T, over_last=over_last)
+                for phone_id in phone_ids)
+    # Nested cycles in python list comprehension is one thing I find confusing myself, but it's fast
+    out = [x for sublist in findings for x in sublist]
+    dprint('Relative success\tphones_time\n', '\n'.join(str(x) for x in out))
+    return out
 
 
-def get_phone_n(n, phone_id, verbose=False):  # Will probably change if we implement queues
-    findings = sessions.find({'participants': int(phone_id)}).sort([('created', -1)]).limit(int(n))
-    if not verbose:
-        findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
-    else:
-        findings = list(findings)
-    dprint('Relative success\tphone_n\n', '\n'.join(str(x) for x in findings))
-    return json.dumps(findings, default=json_util.default)
+def get_phone_n(phone_id, n, verbose=False):
+    phone_id = int(phone_id)
+    n = int(n)
+    findings = legs.find({'$or': [{'from_': phone_id}, {'to_': phone_id}]}).sort([('created', -1)]).limit(n)
+    out = []
+    for leg in findings:
+        session = sessions.find_one({'_id': leg['_sid']})
+        finding = {'created': leg['created'],
+                   'terminated': leg['terminated'],
+                   'from_': session['from_'],
+                   'to_': session['to_']}
+        out.append(finding)
+    # TODO: Account for verbose
+    # if not verbose:
+    #     findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
+    # else:
+    #     findings = list(findings)
+    dprint('Relative success\tphone_n\n', '\n'.join(str(x) for x in out))
+    return out
 
 
 def get_time_only(t=None, T=None, over_last=None, verbose=False):
@@ -93,17 +115,22 @@ def get_time_only(t=None, T=None, over_last=None, verbose=False):
     if over_last:
         T = datetime.datetime.utcnow()
         t = T - datetime.timedelta(hours=int(over_last))
-    #else:
-    #    T = datetime.datetime.utcfromtimestamp(T)
-    #    t = datetime.datetime.utcfromtimestamp(t)
-    findings = sessions.find({'terminated': {'$gte': t},
-                              'created'   : {'$lte': T}})
-    if not verbose:
-        findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
-    else:
-        findings = list(findings)
-    dprint('Relative success\ttime_only\n', '\n'.join(str(x) for x in findings))
-    return json.dumps(findings, default=json_util.default)
+    findings = legs.find({'terminated': {'$gte': t},
+                          'created': {'$lte': T}})
+    out = []
+    for leg in findings:
+        session = sessions.find_one({'_id': leg['_sid']})
+        finding = {'created': leg['created'],
+                   'terminated': leg['terminated'],
+                   'from_': session['from_'],
+                   'to_': session['to_']}
+        out.append(finding)
+    # if not verbose:
+    #     findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
+    # else:
+    #     findings = list(findings)
+    dprint('Relative success\ttime_only\n', '\n'.join(str(x) for x in out))
+    return out
 
 
 def get_request(request_type=None, **kwargs):
@@ -113,13 +140,14 @@ def get_request(request_type=None, **kwargs):
               'phones_time': get_phones_time}
     try:
         handler = switch[request_type]
-        return handler(**kwargs)
+        result = handler(**kwargs)
+        return 200, json.dumps(result, default=json_util.default)
     except KeyError as ex:
-        return 'Unknown request type\n' + str(ex)
+        return 400, 'Unknown request type\n' + str(ex)
     except NameError as ex:
-        return 'Invalid parameter\n' + str(ex)
+        return 400, 'Invalid parameter\n' + str(ex)
     except TypeError as ex:
-        return 'Invalid keyword\n' + str(ex)
+        return 400, 'Invalid keyword\n' + str(ex)
 
 
 def create_session(session_type, created, from_, to_):
@@ -192,9 +220,9 @@ def post_request(data):
     try:
         request_type = data.pop('request_type')
         handler = switch[request_type]
-        return handler(**data)
+        return 200, handler(**data)
     except KeyError as ex:
-        return 'Unknown request type\n' + str(ex)
+        return 400, 'Unknown request type\n' + str(ex)
 
 
 # Server itself
@@ -205,8 +233,8 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             path = self.path
             query = urlparse(path).query
             qs = dict(parse_qsl(query))
-            response = get_request(**qs)
-            self.send_response(200)
+            r_code, response = get_request(**qs)
+            self.send_response(r_code)
             self.send_header('content-type', 'application/json')
             self.end_headers()
             self.flush_headers()
@@ -219,8 +247,8 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             length = int(self.headers['content-length'])
             rawdata = self.rfile.read(length)
             data = json_util.loads(str(rawdata, 'utf-8'))
-            response = post_request(data)
-            self.send_response(200)
+            r_code, response = post_request(data)
+            self.send_response(r_code)
             self.send_header('content-type', 'text/html')
             self.end_headers()
             self.flush_headers()
