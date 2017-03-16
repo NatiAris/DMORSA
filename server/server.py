@@ -45,9 +45,12 @@ def get_phone_time(phone_id, verbose=False,
     if over_last:
         T = datetime.datetime.utcnow()
         t = T - datetime.timedelta(hours=int(over_last))
+    else:
+        T = datetime.datetime.utcfromtimestamp(int(T))
+        t = datetime.datetime.utcfromtimestamp(int(t))
     # dprint(t, T, over_last, phone_id, sep='\n')
     # not (ended < t or beginning > T) => take
-    # ended ≥ t and beginnig ≤ T
+    # ended ≥ t and beginning ≤ T
     findings = legs.find({'$or': [{'from_': phone_id}, {'to_': phone_id}],
                           'created': {'$lte': T},
                           'terminated': {'$gte': t}},
@@ -115,6 +118,9 @@ def get_time_only(t=None, T=None, over_last=None, verbose=False):
     if over_last:
         T = datetime.datetime.utcnow()
         t = T - datetime.timedelta(hours=int(over_last))
+    else:
+        T = datetime.datetime.utcfromtimestamp(int(T))
+        t = datetime.datetime.utcfromtimestamp(int(t))
     findings = legs.find({'terminated': {'$gte': t},
                           'created': {'$lte': T}})
     out = []
