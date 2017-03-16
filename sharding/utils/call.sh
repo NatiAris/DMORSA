@@ -53,9 +53,7 @@ echo "{
 \"_ses_id\" :{\"\$oid\": \"$_id1$_id2\"}
 }
 
-"> legs.json
-
-echo "{
+{
 \"created\" :{\"\$date\": $date},
 \"updated\" :{\"\$date\": $date_update},
 \"from_\" :-1,

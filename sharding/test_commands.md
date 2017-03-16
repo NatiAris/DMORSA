@@ -29,6 +29,6 @@ sh.status()
 use asl
 db.sessions.count()
 db.sessions.getIndexes()
-db.sessions.status()
-db.sessions.status().size
+db.sessions.stats()
+db.sessions.stats().size
 ```

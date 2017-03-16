@@ -8,3 +8,4 @@ server/tests/random
 server/tests/sys
 
 sharding/data/
+sharding/test/
