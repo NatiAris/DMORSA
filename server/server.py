@@ -58,19 +58,25 @@ def get_phone_time(phone_id, verbose=False,
     out = []
     for leg in findings:
         session = sessions.find_one({'_id': leg['_sid']})
-        finding = {'created': leg['created'],
-                   'terminated': leg['terminated'],
-                   'session_type': session['session_type'],
-                   'from_': session['from_'],
-                   'to_': session['to_']}
+        if verbose:
+            all_legs = legs.find({'_sid': session['_id']},
+                                 {'_id': 1, 'created': 1, 'terminated': 1, 'updated': 1, 'from_': 1, 'to_': 1})
+            finding = {'_id': session['_id'],
+                       'created': session['created'],
+                       'terminated': session['terminated'],
+                       'updated': session['updated'],
+                       'session_type': session['session_type'],
+                       'from_': session['from_'],
+                       'to_': session['to_'],
+                       'legs': [leg for leg in all_legs]}
+        else:
+            finding = {'created': leg['created'],
+                       'terminated': leg['terminated'],
+                       'session_type': session['session_type'],
+                       'from_': session['from_'],
+                       'to_': session['to_']}
         out.append(finding)
-    # TODO: account for verbose
-    # findings = sessions.find({})
     # dprint('findings:', findings)
-    # if not verbose:
-    #     findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
-    # else:
-    #     findings = list(findings)
     # dprint('Relative success\tphone_time\n', '\n'.join(str(x) for x in findings))
     return out
 
@@ -83,11 +89,8 @@ def get_phones_time(phone_ids=None, account_id=None, verbose=False,
         phone_ids = list(map(int, accounts.find_one({'_id': int(account_id)})['phones']))
     else:
         phone_ids = list(map(int, phone_ids.split(',')))
-
-    findings = (get_phone_time(phone_id, verbose=verbose, t=t, T=T, over_last=over_last)
-                for phone_id in phone_ids)
-    # Nested cycles in python list comprehension is one thing I find confusing myself, but it's fast
-    out = [x for sublist in findings for x in sublist]
+    out = [get_phone_time(phone_id, verbose=verbose, t=t, T=T, over_last=over_last)
+           for phone_id in phone_ids]
     dprint('Relative success\tphones_time\n', '\n'.join(str(x) for x in out))
     return out
 
@@ -99,17 +102,24 @@ def get_phone_n(phone_id, n, verbose=False):
     out = []
     for leg in findings:
         session = sessions.find_one({'_id': leg['_sid']})
-        finding = {'created': leg['created'],
-                   'terminated': leg['terminated'],
-                   'session_type': session['session_type'],
-                   'from_': session['from_'],
-                   'to_': session['to_']}
+        if verbose:
+            all_legs = legs.find({'_sid': session['_id']},
+                                 {'_id': 1, 'created': 1, 'terminated': 1, 'updated': 1, 'from_': 1, 'to_': 1})
+            finding = {'_id': session['_id'],
+                       'created': session['created'],
+                       'terminated': session['terminated'],
+                       'updated': session['updated'],
+                       'session_type': session['session_type'],
+                       'from_': session['from_'],
+                       'to_': session['to_'],
+                       'legs': [leg for leg in all_legs]}
+        else:
+            finding = {'created': leg['created'],
+                       'terminated': leg['terminated'],
+                       'session_type': session['session_type'],
+                       'from_': session['from_'],
+                       'to_': session['to_']}
         out.append(finding)
-    # TODO: Account for verbose
-    # if not verbose:
-    #     findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
-    # else:
-    #     findings = list(findings)
     dprint('Relative success\tphone_n\n', '\n'.join(str(x) for x in out))
     return out
 
@@ -128,17 +138,24 @@ def get_time_only(t=None, T=None, over_last=None, verbose=False):
     out = []
     for leg in findings:
         session = sessions.find_one({'_id': leg['_sid']})
-        finding = {'created': leg['created'],
-                   'terminated': leg['terminated'],
-                   'session_type': session['session_type'],
-                   'from_': session['from_'],
-                   'to_': session['to_']}
+        if verbose:
+            all_legs = legs.find({'_sid': session['_id']},
+                                 {'_id': 1, 'created': 1, 'terminated': 1, 'updated': 1, 'from_': 1, 'to_': 1})
+            finding = {'_id': session['_id'],
+                       'created': session['created'],
+                       'terminated': session['terminated'],
+                       'updated': session['updated'],
+                       'session_type': session['session_type'],
+                       'from_': session['from_'],
+                       'to_': session['to_'],
+                       'legs': [leg for leg in all_legs]}
+        else:
+            finding = {'created': leg['created'],
+                       'terminated': leg['terminated'],
+                       'session_type': session['session_type'],
+                       'from_': session['from_'],
+                       'to_': session['to_']}
         out.append(finding)
-    # TODO: Verbose case handling
-    # if not verbose:
-    #     findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
-    # else:
-    #     findings = list(findings)
     dprint('Relative success\ttime_only\n', '\n'.join(str(x) for x in out))
     return out
 
