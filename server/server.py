@@ -125,6 +125,7 @@ def get_time_only(t=None, T=None, over_last=None, verbose=False):
                    'from_': session['from_'],
                    'to_': session['to_']}
         out.append(finding)
+    # TODO: Verbose case handling
     # if not verbose:
     #     findings = [{k: finding[k] for k in nv_fields & finding.keys()} for finding in findings]
     # else:
@@ -150,46 +151,35 @@ def get_request(request_type=None, **kwargs):
         return 400, 'Invalid keyword\n' + str(ex)
 
 
-def create_session(session_type, created, from_, to_):
-    # created = datetime.datetime.utcfromtimestamp(created['$date'] // 1e3)
-    session_id = objectid.ObjectId()
+def create_session(session_type, created, from_, to_, session_id=None):
+    session_id = objectid.ObjectId(session_id)
     from_, to_ = int(from_), int(to_)
     session_id = sessions.insert_one({'_id'         : session_id,
                                       'session_type': session_type,
                                       'created'     : created,
                                       'updated'     : datetime.datetime.utcnow(),
-                                      'terminated'  : datetime.datetime.utcnow() + datetime.timedelta(hours=24),
                                       'from_'       : from_,
-                                      'to_'         : to_,
-                                      'participants': [from_, to_],
-                                      'legs'        : []}).inserted_id
+                                      'to_'         : to_}).inserted_id
     dprint('Session id:', session_id)
     return session_id
 
 
-def create_leg(session_id, created, from_, to_):
-    # created = datetime.datetime.utcfromtimestamp(created['$date'] // 1e3)
+def create_leg(session_id, created, from_, to_, leg_id=None):
     session_id = objectid.ObjectId(session_id)
-    leg_id = objectid.ObjectId()
-    user = list(map(int, filter(lambda x: int(x) > 0, (from_, to_))))
-    modcount = sessions.update_one({'_id': session_id},
-                                   {
-                                       '$addToSet': {'legs': {'_id'    : leg_id,
-                                                              'created': created,
-                                                              'terminated': datetime.datetime.utcnow() + datetime.timedelta(hours=24),
-                                                              'from_'  : int(from_),
-                                                              'to_'    : int(to_)},
-                                                     'participants': {'$each': user}},
-                                       '$currentDate': {'updated': True}
-                                   }).modified_count
-    dprint('Modified count:', modcount)
+    leg_id = objectid.ObjectId(leg_id)
+    leg_id = legs.insert_one({'_id': leg_id,
+                              '_sid': session_id,
+                              'created': created,
+                              'updated': datetime.datetime.utcnow(),
+                              'from_': from_,
+                              'to_': to_,
+                              'shkey': 1}).inserted_id
     dprint('Leg id:', leg_id)
     return leg_id
 
 
 def update_session(session_id, terminated):
     session_id = objectid.ObjectId(session_id)
-    # terminated = datetime.datetime.utcfromtimestamp(terminated['$date'] // 1e3)
     response = sessions.update_one({'_id': session_id},
                                    {
                                        '$set': {'terminated': terminated},
@@ -199,15 +189,13 @@ def update_session(session_id, terminated):
     return response
 
 
-def update_leg(session_id, leg_id, terminated):
-    session_id = objectid.ObjectId(session_id)
+def update_leg(leg_id, terminated):
     leg_id = objectid.ObjectId(leg_id)
-    # terminated = datetime.datetime.utcfromtimestamp(terminated['$date'] // 1e3)
-    response = sessions.update_one({'_id': session_id, 'legs._id': leg_id},
-                                   {
-                                        '$set': {'legs.$.terminated': terminated},
-                                        '$currentDate': {'updated': True}
-                                   }).modified_count
+    response = legs.update_one({'_id': leg_id},
+                               {
+                                   '$set': {'terminated': terminated},
+                                   '$currentDate': {'updated': True}
+                               }).modified_count
     dprint('Modified count:', response)
     return response
 
@@ -240,6 +228,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.flush_headers()
             self.wfile.write(bytes(str(response) + '\n', 'utf-8'))
         except Exception as ex:
+            self.send_response_only(500)
             eprint(ex)
     
     def do_POST(self):
@@ -254,6 +243,7 @@ class MyRequestHandler(BaseHTTPRequestHandler):
             self.flush_headers()
             self.wfile.write(bytes(str(response) + '\n', 'utf-8'))
         except Exception as ex:
+            self.send_response_only(500)
             eprint(ex)
 
 
