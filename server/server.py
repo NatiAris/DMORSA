@@ -60,6 +60,7 @@ def get_phone_time(phone_id, verbose=False,
         session = sessions.find_one({'_id': leg['_sid']})
         finding = {'created': leg['created'],
                    'terminated': leg['terminated'],
+                   'session_type': session['session_type'],
                    'from_': session['from_'],
                    'to_': session['to_']}
         out.append(finding)
@@ -100,6 +101,7 @@ def get_phone_n(phone_id, n, verbose=False):
         session = sessions.find_one({'_id': leg['_sid']})
         finding = {'created': leg['created'],
                    'terminated': leg['terminated'],
+                   'session_type': session['session_type'],
                    'from_': session['from_'],
                    'to_': session['to_']}
         out.append(finding)
@@ -128,6 +130,7 @@ def get_time_only(t=None, T=None, over_last=None, verbose=False):
         session = sessions.find_one({'_id': leg['_sid']})
         finding = {'created': leg['created'],
                    'terminated': leg['terminated'],
+                   'session_type': session['session_type'],
                    'from_': session['from_'],
                    'to_': session['to_']}
         out.append(finding)
