@@ -48,7 +48,7 @@ def get_phone_time(phone_id, verbose=False,
     else:
         T = datetime.datetime.utcfromtimestamp(int(T))
         t = datetime.datetime.utcfromtimestamp(int(t))
-    # dprint(t, T, over_last, phone_id, sep='\n')
+    dprint(t, T, over_last, phone_id)
     # not (ended < t or beginning > T) => take
     # ended ≥ t and beginning ≤ T
     findings = legs.find({'$or': [{'from_': phone_id}, {'to_': phone_id}],
@@ -57,6 +57,7 @@ def get_phone_time(phone_id, verbose=False,
                          {'created': 1, 'terminated': 1, '_sid': 1})
     out = []
     for leg in findings:
+        dprint(leg)
         session = sessions.find_one({'_id': leg['_sid']})
         if verbose:
             all_legs = legs.find({'_sid': session['_id']},
@@ -76,8 +77,8 @@ def get_phone_time(phone_id, verbose=False,
                        'from_': session['from_'],
                        'to_': session['to_']}
         out.append(finding)
-    # dprint('findings:', findings)
-    # dprint('Relative success\tphone_time\n', '\n'.join(str(x) for x in findings))
+    dprint('findings:', out)
+    dprint('Relative success\tphone_time\n', '\n'.join(str(x) for x in out))
     return out
 
 
@@ -193,6 +194,7 @@ def create_session(session_type, created, from_, to_, session_id=None):
 def create_leg(session_id, created, from_, to_, leg_id=None):
     session_id = objectid.ObjectId(session_id)
     leg_id = objectid.ObjectId(leg_id)
+    from_, to_ = int(from_), int(to_)
     leg_id = legs.insert_one({'_id': leg_id,
                               '_sid': session_id,
                               'created': created,
