@@ -214,7 +214,7 @@ def post_request(data):
     try:
         request_type = data.pop('request_type')
         handler = switch[request_type]
-        return 200, handler(**data)
+        return 201, handler(**data)
     except KeyError as ex:
         return 400, 'Unknown request type\n' + str(ex)
 
