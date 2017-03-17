@@ -1,5 +1,7 @@
-_id1=$(shuf -i 100000000000-999999999999 -n 1)
-_id2=$(shuf -i 100000000000-999999999999 -n 1)
+_sid1=$(shuf -i 100000000000-999999999999 -n 1)
+_sid2=$(shuf -i 100000000000-999999999999 -n 1)
+_lid1=$(shuf -i 100000000000-999999999999 -n 1)
+_lid2=$(shuf -i 100000000000-999999999999 -n 1)
 let "d2=2*24*3600*1000"
 let "w2=14*24*3600*1000"
 let "m1=30*24*3600*1000"
@@ -32,7 +34,7 @@ date_update=$(shuf -i $terminated-$date_ul -n 1)
 # echo $date >> date.temp
 
 echo "{
-\"_id\" :{\"\$oid\": \"$_id1$_id2\"},
+\"_sid\" :{\"\$oid\": \"$_sid1$_sid2\"},
 \"session_type\" :\"call\",
 \"created\" :{\"\$date\": $date},
 \"updated\" :{\"\$date\": $date_update},
@@ -44,25 +46,30 @@ echo "{
 " >> sessions.json
 
 echo "{
+\"_lid\" :{\"\$oid\": \"$_lid1$_lid2\"},
 \"created\" :{\"\$date\": $date},
 \"updated\" :{\"\$date\": $date_update},
 \"from_\" :$from_,
 \"to_\" :-1,
 \"shkey\" :$shkey,
 \"terminated\" :{\"\$date\": $terminated},
-\"_ses_id\" :{\"\$oid\": \"$_id1$_id2\"}
-}
+\"_sid\" :{\"\$oid\": \"$_sid1$_sid2\"}
+}" >> legs.json
 
-{
+_lid1=$(shuf -i 100000000000-999999999999 -n 1)
+_lid2=$(shuf -i 100000000000-999999999999 -n 1)
+
+echo "{
+\"_lid\" :{\"\$oid\": \"$_lid1$_lid2\"},
 \"created\" :{\"\$date\": $date},
 \"updated\" :{\"\$date\": $date_update},
 \"from_\" :-1,
 \"to_\" :$to_,
 \"shkey\" :$shkey,
 \"terminated\" :{\"\$date\": $terminated},
-\"_ses_id\" :{\"\$oid\": \"$_id1$_id2\"}
+\"_sid\" :{\"\$oid\": \"$_sid1$_sid2\"}
 }
 
 ">> legs.json
 
-# mongoimport --db asl --collection sessions --file call/call.json
+# mongoimport --db asl --collection sessions --file call/call.json.
