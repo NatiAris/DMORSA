@@ -1,3 +1,4 @@
+# Written by Mikova Valentina
 mkdir -p call
 date=$(shuf -i 1450000000000-1489000000000 -n 1)
 from_=$(shuf -i 100000-999999 -n 1)

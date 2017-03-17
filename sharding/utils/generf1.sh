@@ -1,3 +1,4 @@
+# Written by Mikova Valentina
 from_=$(shuf -i 100-999 -n 1)
 q=$(shuf -i 0-10000 -n 1)
 

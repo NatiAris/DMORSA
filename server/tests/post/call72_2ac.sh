@@ -1,3 +1,4 @@
+# Written by Mikova Valentina
 mkdir -p call72_2ac
 date=$(date +%s)
 let "date=date*1000"

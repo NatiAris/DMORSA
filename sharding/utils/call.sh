@@ -1,3 +1,5 @@
+# Written by Mikova Valentina and Akchurin Roman
+
 _sid1=$(shuf -i 100000000000-999999999999 -n 1)
 _sid2=$(shuf -i 100000000000-999999999999 -n 1)
 _lid1=$(shuf -i 100000000000-999999999999 -n 1)
@@ -71,5 +73,3 @@ echo "{
 }
 
 ">> legs.json
-
-# mongoimport --db asl --collection sessions --file call/call.json.

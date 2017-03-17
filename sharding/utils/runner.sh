@@ -1,3 +1,4 @@
+# Written by Mikova Valentina and Akchurin Roman
 > temp.temp
 > date.temp
 
