@@ -1,7 +1,0 @@
-{
-"request_type" :"create_session",
-"session_type" :"conference",
-"from_" :"372572",
-"to_" :"659922",
-"created" :{"$date": 1460197078893}
-}

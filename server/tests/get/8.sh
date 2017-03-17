@@ -1,2 +1,6 @@
 # Written by Mikova Valentina
-curl "http://localhost:3467/?request_type=time_only&t=1489049832000&T=1489136232000"  > response_t8.txt
+#It returns extended information (all information of legs and sessions stored in the DB:
+#session type, session and leg ids, from, to, date of creation, completion, update) 
+#about call for the last 24 hours
+
+curl "http://localhost:3467/?request_type=time_only&over_last=24&verbose=1"  > response_t8.txt

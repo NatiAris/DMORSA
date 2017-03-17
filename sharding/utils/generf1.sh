@@ -1,4 +1,6 @@
 # Written by Mikova Valentina
+# Generating get requests for profiling. It takes into account the different frequency of requests.
+
 from_=$(shuf -i 100-999 -n 1)
 q=$(shuf -i 0-10000 -n 1)
 

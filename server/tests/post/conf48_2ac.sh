@@ -1,4 +1,8 @@
 # Written by Mikova Valentina
+#Generating of a conference through the server between phone numbers 10, 11, 20 not belonging to the same 
+#account.
+#The conference occurred during the second day from the present time.
+
 mkdir -p conf48_2ac
 date=$(date +%s)
 let "date=date*1000"

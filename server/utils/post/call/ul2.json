@@ -1,6 +1,0 @@
-{
-"request_type" :"update_leg",
-"leg_id" :"58beb164ba3edc0cb8700f9e",
-"session_id" :"58beb161ba3edc0cb8700f95",
-"terminated" :{"$date": 2673502741348}
-}

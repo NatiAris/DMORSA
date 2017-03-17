@@ -1,4 +1,6 @@
 # Written by Mikova Valentina and Akchurin Roman
+# It starts the generation of calls.
+
 > temp.temp
 > date.temp
 

@@ -1,4 +1,7 @@
 # Written by Mikova Valentina
+#Generating of a call through the server between phone numbers 10, 20 not belonging to the same account.
+#The call occurred during the third day from the present time
+
 mkdir -p call72_2ac
 date=$(date +%s)
 let "date=date*1000"

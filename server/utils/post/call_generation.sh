@@ -1,8 +1,11 @@
 # Written by Mikova Valentina
+#Generating of a call through the server. Possible date of the call is 1.03.2016-1.04.2017.
+#Possible phone numbers are 100-999.
+
 mkdir -p call
-date=$(shuf -i 1450000000000-1489000000000 -n 1)
-from_=$(shuf -i 100000-999999 -n 1)
-to_=$(shuf -i 100000-999999 -n 1)
+date=$(shuf -i 1456779600000-1490994000000 -n 1)
+from_=$(shuf -i 100-999 -n 1)
+to_=$(shuf -i 100-999 -n 1)
 
 echo "{
 \"request_type\" :\"create_session\",

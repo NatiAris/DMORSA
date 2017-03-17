@@ -1,4 +1,6 @@
 # Written by Mikova Valentina
+# Create a collection of accounts, there are 10 consecutive numbers in each account. 
+#Possible phone numbers are 100-999.
 
 for (( i=100; i<999; i++ ))
 do

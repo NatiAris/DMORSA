@@ -1,4 +1,7 @@
 # Written by Mikova Valentina and Akchurin Roman
+#Generating of a call for profiling. Possible date of the call is 1.03.2016-1.04.2017.
+#Possible phone numbers are 100-999. There are 5 shards. 
+#Shard borders from the 1st April 2017: 2 days, 2 weeks, 1 month, 4 months.
 
 _sid1=$(shuf -i 100000000000-999999999999 -n 1)
 _sid2=$(shuf -i 100000000000-999999999999 -n 1)
