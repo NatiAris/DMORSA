@@ -183,12 +183,12 @@ def get_request(request_type=None, **kwargs):
 def create_session(session_type, created, from_, to_, session_id=None):
     session_id = objectid.ObjectId(session_id)
     from_, to_ = int(from_), int(to_)
-    session_id = sessions.insert_one({'_sid'        : session_id,
-                                      'session_type': session_type,
-                                      'created'     : created,
-                                      'updated'     : datetime.datetime.utcnow(),
-                                      'from_'       : from_,
-                                      'to_'         : to_}).inserted_id
+    sessions.insert_one({'_sid'        : session_id,
+                         'session_type': session_type,
+                         'created'     : created,
+                         'updated'     : datetime.datetime.utcnow(),
+                         'from_'       : from_,
+                         'to_'         : to_})
     dprint('Session id:', session_id)
     return session_id
 
@@ -197,13 +197,13 @@ def create_leg(session_id, created, from_, to_, leg_id=None):
     session_id = objectid.ObjectId(session_id)
     leg_id = objectid.ObjectId(leg_id)
     from_, to_ = int(from_), int(to_)
-    leg_id = legs.insert_one({'_lid': leg_id,
-                              '_sid': session_id,
-                              'created': created,
-                              'updated': datetime.datetime.utcnow(),
-                              'from_': from_,
-                              'to_': to_,
-                              'shkey': 1}).inserted_id
+    legs.insert_one({'_lid': leg_id,
+                     '_sid': session_id,
+                     'created': created,
+                     'updated': datetime.datetime.utcnow(),
+                     'from_': from_,
+                     'to_': to_,
+                     'shkey': 1})
     dprint('Leg id:', leg_id)
     return leg_id
 
