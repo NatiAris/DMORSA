@@ -10,8 +10,8 @@ q=$(shuf -i 0-10000 -n 1)
 #24h-3m
 
 echo "{
-$or:[{from_: from_},{to_: from}],
-\"terminated\" :{$lte: new Date(now)},
-\"created\" :{$gte: new Date(now-$dt)}
+\$or:[{from_: from_},{to_: from_}],
+\"terminated\" :{\$lte: new Date(now)},
+\"created\" :{\$gte: new Date(now-$dt)}
 }
 " > f1.json

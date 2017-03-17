@@ -1,5 +1,0 @@
-{
-	"request_type"	: "update_leg",
-	"leg_id"	: 17,
-	"terminated"	: {"$date": 1488520009000}
-}

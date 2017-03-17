@@ -1,5 +1,0 @@
-{
-	"request_type"	: "update_session",
-	"session_id"	: 8,
-	"terminated"	: {"$date": 1488520107000}
-}
