@@ -17,7 +17,7 @@ from urllib.parse import urlparse, parse_qsl
 try:
     DEBUG = bool(int(sys.argv[1]))
 except IndexError:
-    DEBUG = True
+    DEBUG = False
 logging_level = logging.DEBUG if DEBUG else logging.INFO
 logging.basicConfig(level=logging_level, stream=sys.stdout)
 log = logging.getLogger()
@@ -32,9 +32,6 @@ db = mongo_client.asl
 accounts = db.accounts
 sessions = db.sessions
 legs = db.legs
-
-# Non-verbose case fields
-nv_fields = {'session_type', 'from_', 'to_', 'created', 'updated', 'terminated'}
 
 
 def get_phone_time(phone_id, verbose=False,
@@ -57,7 +54,6 @@ def get_phone_time(phone_id, verbose=False,
                          {'created': 1, 'terminated': 1, '_sid': 1})
     out = []
     for leg in findings:
-        dprint(leg)
         session = sessions.find_one({'_sid': leg['_sid']})
         if verbose:
             all_legs = legs.find({'_sid': session['_sid']},
@@ -78,7 +74,6 @@ def get_phone_time(phone_id, verbose=False,
                        'to_': session['to_']}
         out.append(finding)
     dprint('findings:', out)
-    dprint('Relative success\tphone_time\n', '\n'.join(str(x) for x in out))
     return out
 
 
@@ -92,7 +87,7 @@ def get_phones_time(phone_ids=None, account_id=None, verbose=False,
         phone_ids = list(map(int, phone_ids.split(',')))
     out = [get_phone_time(phone_id, verbose=verbose, t=t, T=T, over_last=over_last)
            for phone_id in phone_ids]
-    dprint('Relative success\tphones_time\n', '\n'.join(str(x) for x in out))
+    dprint('findings:', out)
     return out
 
 
@@ -102,7 +97,6 @@ def get_phone_n(phone_id, n, verbose=False):
     findings = legs.find({'$or': [{'from_': phone_id}, {'to_': phone_id}]}).sort([('created', -1)]).limit(n)
     out = []
     for leg in findings:
-        dprint(leg)
         session = sessions.find_one({'_sid': leg['_sid']})
         if verbose:
             all_legs = legs.find({'_sid': session['_sid']},
@@ -122,7 +116,7 @@ def get_phone_n(phone_id, n, verbose=False):
                        'from_': session['from_'],
                        'to_': session['to_']}
         out.append(finding)
-    dprint('Relative success\tphone_n\n', '\n'.join(str(x) for x in out))
+    dprint('findings:', out)
     return out
 
 
@@ -139,7 +133,6 @@ def get_time_only(t=None, T=None, over_last=None, verbose=False):
                           'created': {'$lte': T}})
     out = []
     for leg in findings:
-        dprint(leg)
         session = sessions.find_one({'_sid': leg['_sid']})
         if verbose:
             all_legs = legs.find({'_sid': session['_sid']},
@@ -159,7 +152,7 @@ def get_time_only(t=None, T=None, over_last=None, verbose=False):
                        'from_': session['from_'],
                        'to_': session['to_']}
         out.append(finding)
-    dprint('Relative success\ttime_only\n', '\n'.join(str(x) for x in out))
+    dprint('findings:', out)
     return out
 
 
