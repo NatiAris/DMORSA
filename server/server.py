@@ -58,11 +58,11 @@ def get_phone_time(phone_id, verbose=False,
     out = []
     for leg in findings:
         dprint(leg)
-        session = sessions.find_one({'_id': leg['_sid']})
+        session = sessions.find_one({'_sid': leg['_sid']})
         if verbose:
-            all_legs = legs.find({'_sid': session['_id']},
-                                 {'_id': 1, 'created': 1, 'terminated': 1, 'updated': 1, 'from_': 1, 'to_': 1})
-            finding = {'_id': session['_id'],
+            all_legs = legs.find({'_sid': session['_sid']},
+                                 {'_lid': 1, 'created': 1, 'terminated': 1, 'updated': 1, 'from_': 1, 'to_': 1})
+            finding = {'_sid': session['_sid'],
                        'created': session['created'],
                        'terminated': session['terminated'],
                        'updated': session['updated'],
@@ -87,7 +87,7 @@ def get_phones_time(phone_ids=None, account_id=None, verbose=False,
     if not any((phone_ids, account_id)):
         raise NameError('Missing phone/account ids')
     if account_id:
-        phone_ids = list(map(int, accounts.find_one({'_id': int(account_id)})['phones']))
+        phone_ids = list(map(int, accounts.find_one({'_aid': int(account_id)})['phones']))
     else:
         phone_ids = list(map(int, phone_ids.split(',')))
     out = [get_phone_time(phone_id, verbose=verbose, t=t, T=T, over_last=over_last)
@@ -102,11 +102,12 @@ def get_phone_n(phone_id, n, verbose=False):
     findings = legs.find({'$or': [{'from_': phone_id}, {'to_': phone_id}]}).sort([('created', -1)]).limit(n)
     out = []
     for leg in findings:
-        session = sessions.find_one({'_id': leg['_sid']})
+        dprint(leg)
+        session = sessions.find_one({'_sid': leg['_sid']})
         if verbose:
-            all_legs = legs.find({'_sid': session['_id']},
-                                 {'_id': 1, 'created': 1, 'terminated': 1, 'updated': 1, 'from_': 1, 'to_': 1})
-            finding = {'_id': session['_id'],
+            all_legs = legs.find({'_sid': session['_sid']},
+                                 {'_lid': 1, 'created': 1, 'terminated': 1, 'updated': 1, 'from_': 1, 'to_': 1})
+            finding = {'_sid': session['_sid'],
                        'created': session['created'],
                        'terminated': session['terminated'],
                        'updated': session['updated'],
@@ -138,11 +139,12 @@ def get_time_only(t=None, T=None, over_last=None, verbose=False):
                           'created': {'$lte': T}})
     out = []
     for leg in findings:
-        session = sessions.find_one({'_id': leg['_sid']})
+        dprint(leg)
+        session = sessions.find_one({'_sid': leg['_sid']})
         if verbose:
-            all_legs = legs.find({'_sid': session['_id']},
-                                 {'_id': 1, 'created': 1, 'terminated': 1, 'updated': 1, 'from_': 1, 'to_': 1})
-            finding = {'_id': session['_id'],
+            all_legs = legs.find({'_sid': session['_sid']},
+                                 {'_lid': 1, 'created': 1, 'terminated': 1, 'updated': 1, 'from_': 1, 'to_': 1})
+            finding = {'_sid': session['_sid'],
                        'created': session['created'],
                        'terminated': session['terminated'],
                        'updated': session['updated'],
@@ -181,7 +183,7 @@ def get_request(request_type=None, **kwargs):
 def create_session(session_type, created, from_, to_, session_id=None):
     session_id = objectid.ObjectId(session_id)
     from_, to_ = int(from_), int(to_)
-    session_id = sessions.insert_one({'_id'         : session_id,
+    session_id = sessions.insert_one({'_sid'        : session_id,
                                       'session_type': session_type,
                                       'created'     : created,
                                       'updated'     : datetime.datetime.utcnow(),
@@ -195,7 +197,7 @@ def create_leg(session_id, created, from_, to_, leg_id=None):
     session_id = objectid.ObjectId(session_id)
     leg_id = objectid.ObjectId(leg_id)
     from_, to_ = int(from_), int(to_)
-    leg_id = legs.insert_one({'_id': leg_id,
+    leg_id = legs.insert_one({'_lid': leg_id,
                               '_sid': session_id,
                               'created': created,
                               'updated': datetime.datetime.utcnow(),
@@ -208,7 +210,7 @@ def create_leg(session_id, created, from_, to_, leg_id=None):
 
 def update_session(session_id, terminated):
     session_id = objectid.ObjectId(session_id)
-    response = sessions.update_one({'_id': session_id},
+    response = sessions.update_one({'_sid': session_id},
                                    {
                                        '$set': {'terminated': terminated},
                                        '$currentDate': {'updated': True}
@@ -219,7 +221,7 @@ def update_session(session_id, terminated):
 
 def update_leg(leg_id, terminated):
     leg_id = objectid.ObjectId(leg_id)
-    response = legs.update_one({'_id': leg_id},
+    response = legs.update_one({'_lid': leg_id},
                                {
                                    '$set': {'terminated': terminated},
                                    '$currentDate': {'updated': True}
