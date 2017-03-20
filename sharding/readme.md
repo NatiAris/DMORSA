@@ -1,15 +1,15 @@
-- `setup.sh` полностью (пере)устанавливает весь кластер со всей инфраструктурой
-- `test_commands.md` содержит различные команды для проверки
-- `restart.sh` позволяет перезапустить всю инфраструктуру в любой момент, если она у вас уже установлена
-- Теперь вы можете подключаться на порт mongos (40000), и всё должно работать
+- `setup.sh` completely (re)installs the entire cluster with the entire infrastructure
+- `test_commands.md` contains various commands for testing
+- `restart.sh` allows you to restart cluster without reinstalling
+- Now you can connect to the `mongos --port 40000`, and everything should work
 
-Дополнительное описание:
-- `shutdown.sh` - выключает весь кластер
-- `hard_clean.sh` - полностью удаляет весь кластер (должен быть отключен)
-- `run.sh` - запускает все mongod
-- `initiate.sh` - настраивает всю взаимосвязь
-- `generate.sh` - генерирует бд в `test`
-- `import.sh` - импортирует бд из `test`
-- `soft_clean.sh` - позволяет удалить старые данные, не испортив кластер
-- папки `test` и `data` репозиторию не видны
+Additional description:
+- `shutdown.sh` - turns off the cluster
+- `hard_clean.sh` - completely removes the entire cluster (should be disabled)
+- `run.sh` - runs all mongod servers
+- `initiate.sh` - configures the entire relationship
+- `db_generation.sh` - generates the DB in `test`
+- `import.sh` - imports the DB from the `test`
+- `soft_clean.sh` - removes old data, without consequences for the cluster
+- The folders `test` and `data` are not visible to the repository
 
