@@ -1,10 +1,11 @@
+#!/usr/bin/env python3
 # coding: utf-8
 
-# import time
-# import random
+# Written by Roman Akchurin
+
 import logging
 import sys
-# Interaction with mongo and json files
+# For the interaction with mongo and json files
 import pymongo
 import datetime
 import json
@@ -13,7 +14,7 @@ from bson import json_util, objectid
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.parse import urlparse, parse_qsl
 
-
+# Very lame approach to handle command line args but using click here would be overkill
 try:
     DEBUG = bool(int(sys.argv[1]))
 except IndexError:
@@ -24,7 +25,7 @@ log = logging.getLogger()
 dprint = lambda *x: logging.debug(' '.join(map(str, x)))
 iprint = lambda *x: logging.info(' '.join(map(str, x)))
 eprint = lambda *x: logging.exception(' '.join(map(str, x)))
-dprint('DEBUG=%s' % DEBUG)
+dprint('Debug printing on')
 
 
 mongo_client = pymongo.MongoClient('localhost', 27017)
@@ -55,7 +56,7 @@ def get_phone_time(phone_id, verbose=False,
     out = []
     for leg in findings:
         session = sessions.find_one({'_sid': leg['_sid']})
-        if verbose:
+        if verbose:  # TODO: Isolate this part as it is repeated later
             all_legs = legs.find({'_sid': session['_sid']},
                                  {'_lid': 1, 'created': 1, 'terminated': 1, 'updated': 1, 'from_': 1, 'to_': 1})
             finding = {'_sid': session['_sid'],
@@ -79,6 +80,7 @@ def get_phone_time(phone_id, verbose=False,
 
 def get_phones_time(phone_ids=None, account_id=None, verbose=False,
                     t=None, T=None, over_last=None):
+    # The function just wraps get_phone_time in order to make it work with lists of numbers
     if not any((phone_ids, account_id)):
         raise NameError('Missing phone/account ids')
     if account_id:
@@ -174,7 +176,7 @@ def get_request(request_type=None, **kwargs):
 
 
 def create_session(session_type, created, from_, to_, session_id=None):
-    session_id = objectid.ObjectId(session_id)
+    session_id = objectid.ObjectId(session_id)  # Generates id if one not provided
     from_, to_ = int(from_), int(to_)
     sessions.insert_one({'_sid'        : session_id,
                          'session_type': session_type,
