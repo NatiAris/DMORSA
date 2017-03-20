@@ -70,4 +70,4 @@ legs='{
 "shkey": '$shkey',
 "terminated": {"$date": '$terminated'},
 "_sid": {"$oid": "'$_sid1$_sid2'"}
-}"
+}'

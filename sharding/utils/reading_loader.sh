@@ -13,8 +13,8 @@ now=$[$(date +%s)*1000]
                  ((dt=7257600000))
 #24h-3m
 echo $q
-date -d @$[$[$now-$dt]/1000]
-date -d @$[$now/1000]
+date -u -d @$[$[$now-$dt]/1000]
+date -u -d @$[$now/1000]
 
-request="db.legs.find({created:{\$gte: new Date("$[$now-$dt]"),\$lte: new Date("$[$now]")}},{_id:0,created:1}).hint({created:1}).sort({created:1}).limit(5)"
+request='db.legs.find({created:{$gte: new Date('$[$now-$dt]'),$lte: new Date('$[$now]')}},{_id:0,created:1}).hint({created:1}).sort({created:1}).limit(10)'
 mongo asl --port 40000 --quiet --norc --eval="$request"

@@ -16,7 +16,7 @@ rm $DIR/test/*.json
 echo $accounts > $DIR/test/accounts.json
 
 if [ "-p" == $2 ]; then
-	stream2=". $DIR""/utils/stream2.sh $3 &"
+	stream2=". $DIR""/utils/stream2.sh $3"
 	echo3=($(echo $sessions2 >> $DIR/test/sessions.json))
 	echo4=($(echo $legs2 >> $DIR/test/sessions.json))
 	N=2
@@ -30,7 +30,7 @@ fi
 (( ( $[$1] > 0 ) && (n=$[$[$1]/$N]) )) || ((n=$[5000/$N]))
 
 for i in $(eval echo {1..$n}); do
-	$stream2
+	$stream2 &
 	. $DIR/utils/stream1.sh $3
 	echo $sessions1 >> $DIR/test/sessions.json
 	echo $legs1 >> $DIR/test/legs.json
