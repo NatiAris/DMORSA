@@ -1,30 +1,26 @@
-# Written by Mikova Valentina and Akchurin Roman
-#Generating of a call for profiling. Possible date of the call is 1.03.2016-1.04.2017.
+# Written by Mikova Valentina, Akchurin Roman and Salavat Garifullin
+#Generating of a call for the one year for profiling.
 #Possible phone numbers are 100-999. There are 5 shards. 
-#Shard borders from the 1st April 2017: 2 days, 2 weeks, 1 month, 4 months.
+#Default shard borders from the 1st April 2017: 2 days, 2 weeks, 1 month, 4 months.
 
-_sid1=$(shuf -i 100000000000-999999999999 -n 1)
-_sid2=$(shuf -i 100000000000-999999999999 -n 1)
-_lid1=$(shuf -i 100000000000-999999999999 -n 1)
-_lid2=$(shuf -i 100000000000-999999999999 -n 1)
-let "d2=2*24*3600*1000"
-let "w2=14*24*3600*1000"
-let "m1=30*24*3600*1000"
-let "m4=120*24*3600*1000"
-now=1490994000000 # around 1st April 2017
+utils=$(dirname "${BASH_SOURCE[0]}")
 
-let "sh1=now-d2"
-let "sh2=now-w2"
-let "sh3=now-m1"
-let "sh4=now-m4"
+#At start you can put option "now", it will be handed over to the program shard_borders.sh
+border=($($utils/shard_borders.sh $@))
+now=${border[0]}
+sh1=${border[1]}
+sh2=${border[2]}
+sh3=${border[3]}
+sh4=${border[4]}
 
-date=$(shuf -i 1456779600000-1490994000000 -n 1)
+year_ago=$[$now-370*24*3600*1000]
+date=$(shuf -i $year_ago-$now -n 1)
 from_=$(shuf -i 100-999 -n 1)
 to_=$(shuf -i 100-999 -n 1)
 dt=$(shuf -i 5000-7200000 -n 1)
-let "terminated=date+dt"
+terminated=$[$date+$dt]
 delta=604800000 # lag before update
-let "date_ul=terminated+delta"
+date_ul=$[$terminated+$delta]
 date_update=$(shuf -i $terminated-$date_ul -n 1)
 
 
@@ -38,7 +34,14 @@ date_update=$(shuf -i $terminated-$date_ul -n 1)
 # echo $shkey >> temp.temp
 # echo $date >> date.temp
 
-echo "{
+_sid1=$(shuf -i 100000000000-999999999999 -n 1)
+_sid2=$(shuf -i 100000000000-999999999999 -n 1)
+_lid1=$(shuf -i 100000000000-999999999999 -n 1)
+_lid2=$(shuf -i 100000000000-999999999999 -n 1)
+_lid3=$(shuf -i 100000000000-999999999999 -n 1)
+_lid4=$(shuf -i 100000000000-999999999999 -n 1)
+
+sessions="{
 \"_sid\" :{\"\$oid\": \"$_sid1$_sid2\"},
 \"session_type\" :\"call\",
 \"created\" :{\"\$date\": $date},
@@ -46,11 +49,9 @@ echo "{
 \"from_\" :$from_,
 \"to_\" :$to_,
 \"terminated\" :{\"\$date\": $terminated}
-}
+}"
 
-" >> sessions.json
-
-echo "{
+legs="{
 \"_lid\" :{\"\$oid\": \"$_lid1$_lid2\"},
 \"created\" :{\"\$date\": $date},
 \"updated\" :{\"\$date\": $date_update},
@@ -59,13 +60,9 @@ echo "{
 \"shkey\" :$shkey,
 \"terminated\" :{\"\$date\": $terminated},
 \"_sid\" :{\"\$oid\": \"$_sid1$_sid2\"}
-}" >> legs.json
-
-_lid1=$(shuf -i 100000000000-999999999999 -n 1)
-_lid2=$(shuf -i 100000000000-999999999999 -n 1)
-
-echo "{
-\"_lid\" :{\"\$oid\": \"$_lid1$_lid2\"},
+}
+{
+\"_lid\" :{\"\$oid\": \"$_lid3$_lid4\"},
 \"created\" :{\"\$date\": $date},
 \"updated\" :{\"\$date\": $date_update},
 \"from_\" :-1,
@@ -73,6 +70,4 @@ echo "{
 \"shkey\" :$shkey,
 \"terminated\" :{\"\$date\": $terminated},
 \"_sid\" :{\"\$oid\": \"$_sid1$_sid2\"}
-}
-
-">> legs.json
+}"
