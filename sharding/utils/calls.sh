@@ -41,33 +41,33 @@ _lid2=$(shuf -i 100000000000-999999999999 -n 1)
 _lid3=$(shuf -i 100000000000-999999999999 -n 1)
 _lid4=$(shuf -i 100000000000-999999999999 -n 1)
 
-sessions="{
-\"_sid\" :{\"\$oid\": \"$_sid1$_sid2\"},
-\"session_type\" :\"call\",
-\"created\" :{\"\$date\": $date},
-\"updated\" :{\"\$date\": $date_update},
-\"from_\" :$from_,
-\"to_\" :$to_,
-\"terminated\" :{\"\$date\": $terminated}
-}"
+sessions='{
+"_sid": {"$oid": "'$_sid1$_sid2'"},
+"session_type": "call",
+"created": {"$date": '$date'},
+"updated": {"$date": '$date_update'},
+"from_": '$from_',
+"to_": '$to_',
+"terminated": {"$date": '$terminated'}
+}'
 
-legs="{
-\"_lid\" :{\"\$oid\": \"$_lid1$_lid2\"},
-\"created\" :{\"\$date\": $date},
-\"updated\" :{\"\$date\": $date_update},
-\"from_\" :$from_,
-\"to_\" :-1,
-\"shkey\" :$shkey,
-\"terminated\" :{\"\$date\": $terminated},
-\"_sid\" :{\"\$oid\": \"$_sid1$_sid2\"}
+legs='{
+"_lid": {"$oid": "'$_lid1$_lid2'"},
+"created": {"$date": '$date'},
+"updated": {"$date": '$date_update'},
+"from_": '$from_',
+"to_": -1,
+"shkey": '$shkey',
+"terminated": {"$date": '$terminated'},
+"_sid": {"$oid": "'$_sid1$_sid2'"}
 }
 {
-\"_lid\" :{\"\$oid\": \"$_lid3$_lid4\"},
-\"created\" :{\"\$date\": $date},
-\"updated\" :{\"\$date\": $date_update},
-\"from_\" :-1,
-\"to_\" :$to_,
-\"shkey\" :$shkey,
-\"terminated\" :{\"\$date\": $terminated},
-\"_sid\" :{\"\$oid\": \"$_sid1$_sid2\"}
+"_lid": {"$oid": "'$_lid3$_lid4'"},
+"created": {"$date": '$date'},
+"updated": {"$date": '$date_update'},
+"from_": -1,
+"to_": '$to_',
+"shkey": '$shkey',
+"terminated": {"$date": '$terminated'},
+"_sid": {"$oid": "'$_sid1$_sid2'"}
 }"

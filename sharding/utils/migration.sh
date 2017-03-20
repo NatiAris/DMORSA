@@ -3,7 +3,7 @@
 
 DIR=$(dirname "${BASH_SOURCE[0]}")
 
-border=($($DIR/shard_borders.sh now 24))
+border=($($DIR/shard_borders.sh now 36))
 sh1=${border[1]}
 sh2=${border[2]}
 sh3=${border[3]}

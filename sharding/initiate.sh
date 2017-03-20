@@ -25,10 +25,13 @@ done
 zones="$shards"'sh.enableSharding("asl");
 sh.shardCollection("asl.sessions", {_sid: 1});
 sh.shardCollection("asl.legs", {shkey: 1});
+*/db.accounts.ensureIndex({_aid: 1}); null;/*
+db.sessions.ensureIndex({_sid: 1}); null;
+*/db.legs.ensureIndex({_lid: 1}); null;/*
 db.legs.ensureIndex({_sid: 1}); null;
 db.legs.ensureIndex({created: 1}); null;
 sh.disableBalancing("asl.legs");
 '"$tags""$range"'sh.enableBalancing("asl.legs"); db.stats()'
-echo $zones > zones.json
+#echo $zones > $DIR/test/zones.json
 mongo asl --port 40000 --quiet --norc --eval="$zones"
 #read -p "Press enter to continue..."
