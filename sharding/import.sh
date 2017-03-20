@@ -1,4 +1,7 @@
-#!/bin/bash
+# Written by Salavat Garifullin
 
-mongoimport --port 40000 --db asl --collection sessions --type json --file ./test/sessions.json
-mongoimport --port 40000 --db asl --collection legs --type json --file ./test/legs.json
+DIR=$(dirname "${BASH_SOURCE[0]}")
+
+mongoimport --port 40000 --db asl --collection accounts --type json --file $DIR/test/accounts.json &
+mongoimport --port 40000 --db asl --collection sessions --type json --file $DIR/test/sessions.json
+mongoimport --port 40000 --db asl --collection legs --type json --file $DIR/test/legs.json

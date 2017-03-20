@@ -1,5 +1,7 @@
-#!/bin/bash
+# Written by Salavat Garifullin
 
-rm -rf ./data/
-mkdir -p ./data/logs/
+DIR=$(dirname "${BASH_SOURCE[0]}")
+
+rm -rf $DIR/data/
+mkdir -p $DIR/data/logs/
 

@@ -1,17 +1,19 @@
-#!/bin/bash
+# Written by Salavat Garifullin
+# When you call a script, you can specify the parameters:
+# -g - generate DB, like "./setup.sh gen"
+# -g 'number' - number of required sessions, like "./setup.sh -g 30"
+# -i - if only import is enough, like "./setup.sh -i"
 
-./shutdown.sh
-./hard_clean.sh
-./run.sh
-./initiate.sh
+DIR=$(dirname "${BASH_SOURCE[0]}")
 
-while true; do
-    read -p "Generate the database?" yn
-    case $yn in
-        [Yy]* ) ./geterate.sh; break;;
-        [Nn]* ) break;;
-        * ) echo "Please answer yes or no.";;
-    esac
-done
-./import.sh
-#mongo --norc --port 40000 < ./cluster/status.js
+$DIR/shutdown.sh
+$DIR/hard_clean.sh
+$DIR/run.sh
+$DIR/initiate.sh
+
+if [ "-i" == "$1" ]; then
+	$DIR/db_generation.sh -n $2
+	$DIR/import.sh
+elif [ "-g" == "$1" ]; then
+	$DIR/import.sh
+fi
