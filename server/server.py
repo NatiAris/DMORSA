@@ -51,8 +51,9 @@ def get_phone_time(phone_id, verbose=False,
     # ended ≥ t and beginning ≤ T
     findings = legs.find({'$or': [{'from_': phone_id}, {'to_': phone_id}],
                           'created': {'$lte': T},
+                          'created': {'$gte': t - datetime.timedelta(hours=24)},
                           'terminated': {'$gte': t}},
-                         {'created': 1, 'terminated': 1, '_sid': 1})
+                         {'created': 1, 'terminated': 1, '_sid': 1}).hint('created')
     out = []
     for leg in findings:
         session = sessions.find_one({'_sid': leg['_sid']})
@@ -131,8 +132,9 @@ def get_time_only(t=None, T=None, over_last=None, verbose=False):
     else:
         T = datetime.datetime.utcfromtimestamp(int(T))
         t = datetime.datetime.utcfromtimestamp(int(t))
-    findings = legs.find({'terminated': {'$gte': t},
-                          'created': {'$lte': T}})
+    findings = legs.find({'created': {'$lte': T},
+                          'created': {'$gte': t - datetime.timedelta(hours=24)},
+                          'terminated': {'$gte': t}}).hint('created')
     out = []
     for leg in findings:
         session = sessions.find_one({'_sid': leg['_sid']})
