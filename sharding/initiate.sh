@@ -1,4 +1,5 @@
 # Written by Salavat Garifullin
+# Configures the entire relationship
 
 DIR=$(dirname "${BASH_SOURCE[0]}")
 
@@ -22,16 +23,20 @@ tags="$tags"'sh.addShardTag("sh'$i'", "tag'$i'"); '
 range="$range"'sh.addTagRange("asl.legs",{"shkey":'${N[$i-1]}'},{"shkey":'${N[$i]}'},"tag'$i'"); '
 done
 
+indexes='*/db.accounts.ensureIndex({_aid: 1});/*
+db.sessions.ensureIndex({_sid: 1});
+*/db.legs.ensureIndex({_lid: 1});/*
+db.legs.ensureIndex({_sid: 1});
+db.legs.ensureIndex({created: 1});'
+
 zones="$shards"'sh.enableSharding("asl");
 sh.shardCollection("asl.sessions", {_sid: 1});
 sh.shardCollection("asl.legs", {shkey: 1});
-*/db.accounts.ensureIndex({_aid: 1}); null;/*
-db.sessions.ensureIndex({_sid: 1}); null;
-*/db.legs.ensureIndex({_lid: 1}); null;/*
-db.legs.ensureIndex({_sid: 1}); null;
-db.legs.ensureIndex({created: 1}); null;
+'"$indexes"'
 sh.disableBalancing("asl.legs");
-'"$tags""$range"'sh.enableBalancing("asl.legs"); db.stats()'
+'"$tags""$range"'
+sh.enableBalancing("asl.legs"); db.stats()'
+
 #echo $zones > $DIR/test/zones.json
 mongo asl --port 40000 --quiet --norc --eval="$zones"
 #read -p "Press enter to continue..."

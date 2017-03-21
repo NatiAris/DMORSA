@@ -1,4 +1,5 @@
 # Written by Salavat Garifullin
+# Turns off the cluster
 
 DIR=$(dirname "${BASH_SOURCE[0]}")
 

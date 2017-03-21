@@ -1,5 +1,5 @@
 # Written by Salavat Garifullin
-# When you call a script, you can specify the parameters:
+# Intermediate function, for parallelization
 
 export sessions legs
 

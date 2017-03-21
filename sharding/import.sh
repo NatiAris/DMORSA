@@ -1,4 +1,5 @@
 # Written by Salavat Garifullin
+# Imports the DB from the ./test
 
 DIR=$(dirname "${BASH_SOURCE[0]}")
 

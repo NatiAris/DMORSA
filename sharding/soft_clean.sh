@@ -1,4 +1,5 @@
 # Written by Salavat Garifullin
+# Removes old data, without consequences for the cluste
 
 cleaner="db.legs.remove({});
 db.sessions.remove({});

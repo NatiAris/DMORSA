@@ -1,6 +1,6 @@
 - `setup.sh` completely (re)installs the entire cluster with the entire infrastructure
 - `test_commands.md` contains various commands for testing
-- `restart.sh` allows you to restart cluster without reinstalling
+- `restart.sh` restart cluster without reinstalling
 - Now you can connect to the `mongos --port 40000`, and everything should work
 
 Additional description:
@@ -12,4 +12,5 @@ Additional description:
 - `import.sh` - imports the DB from the `test`
 - `soft_clean.sh` - removes old data, without consequences for the cluster
 - The folders `test` and `data` are not visible to the repository
+- Parameters for calling scripts are listed in the heads
 

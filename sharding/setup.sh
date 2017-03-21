@@ -1,19 +1,19 @@
 # Written by Salavat Garifullin
 # When you call a script, you can specify the parameters:
-# -g - generate DB, like "./setup.sh gen"
-# -g 'number' - number of required sessions, like "./setup.sh -g 30"
-# -i - if only import is enough, like "./setup.sh -i"
+# -i - if only import is enough
+# -g - generate DB, by defaulе 5000 sessions
+# -g 'number' - number of required sessions
 
 DIR=$(dirname "${BASH_SOURCE[0]}")
 
 $DIR/shutdown.sh
 $DIR/hard_clean.sh
-$DIR/run.sh
+$DIR/run.sh -j  # to use profiling
 $DIR/initiate.sh
 
-if [ "-i" == "$1" ]; then
-	$DIR/db_generation.sh -n $2
+if [ "-g" == "$1" ]; then
+	$DIR/db_generation.sh null $2
 	$DIR/import.sh
-elif [ "-g" == "$1" ]; then
+elif [ "-i" == "$1" ]; then
 	$DIR/import.sh
 fi

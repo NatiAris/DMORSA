@@ -1,6 +1,8 @@
 # Written by Salavat Garifullin
+# Restarts the cluster without reinstalling it
 
 DIR=$(dirname "${BASH_SOURCE[0]}")
+
 $DIR/shutdown.sh
 $DIR/run.sh
 
